@@ -25,6 +25,9 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Copy custom nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf
 
+# Install envsubst for environment variable substitution
+RUN apk add --no-cache gettext
+
 # Create env.js file that will be populated at runtime
 RUN echo 'window.__ENV__ = {};' > /usr/share/nginx/html/env.js
 
@@ -32,8 +35,8 @@ RUN echo 'window.__ENV__ = {};' > /usr/share/nginx/html/env.js
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
-# Expose port 80
-EXPOSE 80
+# Expose port that will be set by PORT environment variable (default 80, Cloud Run uses 8080)
+EXPOSE $PORT
 
 # Use custom entrypoint
 ENTRYPOINT ["/docker-entrypoint.sh"]

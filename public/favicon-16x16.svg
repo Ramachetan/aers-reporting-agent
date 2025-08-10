@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+  <defs>
+    <linearGradient id="medicalGradient16" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2563EB;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="8" cy="8" r="7.5" fill="url(#medicalGradient16)" stroke="#1E40AF" stroke-width="0.3"/>
+  
+  <!-- Medical cross -->
+  <rect x="7.2" y="4" width="1.6" height="8" rx="0.5" fill="white"/>
+  <rect x="4" y="7.2" width="8" height="1.6" rx="0.5" fill="white"/>
+  
+  <!-- Small notification dot -->
+  <circle cx="12" cy="4" r="1" fill="#14B8A6"/>
+  <circle cx="12" cy="4" r="0.6" fill="white"/>
+</svg>

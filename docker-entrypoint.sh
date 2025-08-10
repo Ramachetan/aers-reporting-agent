@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# Set default port if not provided
+export PORT=${PORT:-80}
+
+# Replace PORT placeholder in nginx config
+envsubst '${PORT}' < /etc/nginx/nginx.conf > /tmp/nginx.conf && mv /tmp/nginx.conf /etc/nginx/nginx.conf
+
 # Generate env.js at runtime with environment variables
 cat > /usr/share/nginx/html/env.js << EOF
 window.__ENV__ = {
