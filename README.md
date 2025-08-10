@@ -69,49 +69,75 @@ npm run dev
 
 This command will start the Vite server. Open your web browser and navigate to the URL provided in your terminal (typically `http://localhost:5173`) to see the application in action.
 
-## Deploying to Cloud Run
+## Cloud Deployment
 
-This project includes a container setup to serve the built SPA via Nginx on Cloud Run.
+This project includes Docker configuration for deploying to Google Cloud Run with automatic CI/CD.
 
-### Build the image
+### Prerequisites for Cloud Deployment
 
-You can build locally or using Cloud Build. Replace `PROJECT_ID` and `REGION` with your GCP values and adjust the image name as desired.
+- Google Cloud Project with billing enabled
+- Cloud Run API enabled
+- Cloud Build API enabled
+- Container Registry or Artifact Registry enabled
 
-```cmd
-:: Optional: authenticate to Artifact Registry (if using)
-:: gcloud auth configure-docker REGION-docker.pkg.dev
+### Automatic Deployment Setup
 
-:: Build with Docker
-docker build -t REGION-docker.pkg.dev/PROJECT_ID/aers/aers-reporting-agent:latest ^
-    --build-arg GEMINI_API_KEY=%GEMINI_API_KEY% ^
-    --build-arg API_KEY=%GEMINI_API_KEY% ^
-    .
+1. **Connect Repository to Cloud Build**:
+   - Go to Cloud Console → Cloud Build → Triggers
+   - Click "Connect Repository" and select your Git repository
+   - Choose "Cloud Build configuration file" and set the path to `cloudbuild.yaml`
 
-:: Push the image
-docker push REGION-docker.pkg.dev/PROJECT_ID/aers/aers-reporting-agent:latest
+2. **Set up Environment Variables** (if needed):
+   - In Cloud Build trigger settings, add environment variables for your API keys
+   - Or use Google Secret Manager for sensitive data
+
+3. **Configure Region** (optional):
+   - Edit `cloudbuild.yaml` to change the deployment region from `us-central1` to your preferred region
+
+### Manual Deployment
+
+If you prefer manual deployment:
+
+```bash
+# Build and deploy using Cloud Build
+gcloud builds submit --config cloudbuild.yaml
+
+# Or build locally and deploy
+docker build -t gcr.io/PROJECT_ID/aers-reporting-agent .
+docker push gcr.io/PROJECT_ID/aers-reporting-agent
+gcloud run deploy aers-reporting-agent \
+  --image gcr.io/PROJECT_ID/aers-reporting-agent \
+  --region us-central1 \
+  --platform managed \
+  --allow-unauthenticated \
+  --port 8080
 ```
 
-Alternatively, build using Cloud Build directly from the repo:
+### Local Testing
 
-```cmd
-gcloud builds submit --tag REGION-docker.pkg.dev/PROJECT_ID/aers/aers-reporting-agent:latest
+Test the Docker container locally before deploying:
+
+```bash
+# On Windows
+run-local.bat
+
+# On Unix/Linux/Mac
+chmod +x run-local.sh
+./run-local.sh
 ```
 
-### Deploy to Cloud Run
+Visit `http://localhost:8080` to test the application.
 
-```cmd
-gcloud run deploy aers-reporting-agent ^
-    --image=REGION-docker.pkg.dev/PROJECT_ID/aers/aers-reporting-agent:latest ^
-    --region=REGION ^
-    --platform=managed ^
-    --allow-unauthenticated ^
-    --port=8080 ^
-    --set-env-vars=GEMINI_API_KEY=YOUR_KEY
-```
+### Deployment Features
 
-Notes:
-- This is a static SPA. Any API calls must be CORS-enabled on the server side (your MedDRA function already is).
-- Never bake secrets into the built static site for public apps. The provided Dockerfile accepts `--build-arg` for convenience, but prefer runtime envs via `--set-env-vars` when feasible and proxy through a backend to avoid exposing keys.
+- **Multi-stage Docker build** for optimized image size
+- **Nginx web server** for efficient static file serving
+- **Health check endpoint** at `/health`
+- **Automatic HTTPS** provided by Cloud Run
+- **Automatic scaling** from 0 to 10 instances
+- **Security headers** configured in nginx
+- **Gzip compression** enabled
+- **SPA routing support** (client-side routing)
 
 ## How It Works
 

@@ -21,3 +21,33 @@ build
 # Tests and coverage
 coverage
 *.lcov
+
+# Development files
+*.md
+README.md
+.editorconfig
+.eslintrc*
+.prettierrc*
+
+# Docker files (avoid recursion)
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Local test scripts
+run-local.*
+*.log
+
+# Cloud Build
+cloudbuild.yaml
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# IDE files
+.idea/
+*.swp
+*.swo
+*~
