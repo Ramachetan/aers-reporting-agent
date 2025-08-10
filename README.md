@@ -69,6 +69,50 @@ npm run dev
 
 This command will start the Vite server. Open your web browser and navigate to the URL provided in your terminal (typically `http://localhost:5173`) to see the application in action.
 
+## Deploying to Cloud Run
+
+This project includes a container setup to serve the built SPA via Nginx on Cloud Run.
+
+### Build the image
+
+You can build locally or using Cloud Build. Replace `PROJECT_ID` and `REGION` with your GCP values and adjust the image name as desired.
+
+```cmd
+:: Optional: authenticate to Artifact Registry (if using)
+:: gcloud auth configure-docker REGION-docker.pkg.dev
+
+:: Build with Docker
+docker build -t REGION-docker.pkg.dev/PROJECT_ID/aers/aers-reporting-agent:latest ^
+    --build-arg GEMINI_API_KEY=%GEMINI_API_KEY% ^
+    --build-arg API_KEY=%GEMINI_API_KEY% ^
+    .
+
+:: Push the image
+docker push REGION-docker.pkg.dev/PROJECT_ID/aers/aers-reporting-agent:latest
+```
+
+Alternatively, build using Cloud Build directly from the repo:
+
+```cmd
+gcloud builds submit --tag REGION-docker.pkg.dev/PROJECT_ID/aers/aers-reporting-agent:latest
+```
+
+### Deploy to Cloud Run
+
+```cmd
+gcloud run deploy aers-reporting-agent ^
+    --image=REGION-docker.pkg.dev/PROJECT_ID/aers/aers-reporting-agent:latest ^
+    --region=REGION ^
+    --platform=managed ^
+    --allow-unauthenticated ^
+    --port=8080 ^
+    --set-env-vars=GEMINI_API_KEY=YOUR_KEY
+```
+
+Notes:
+- This is a static SPA. Any API calls must be CORS-enabled on the server side (your MedDRA function already is).
+- Never bake secrets into the built static site for public apps. The provided Dockerfile accepts `--build-arg` for convenience, but prefer runtime envs via `--set-env-vars` when feasible and proxy through a backend to avoid exposing keys.
+
 ## How It Works
 
 1.  **Initial Interaction**: The user is greeted with a landing page where they can describe their problem or upload a relevant document/photo.
