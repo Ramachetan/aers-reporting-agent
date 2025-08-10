@@ -1,0 +1,3 @@
+/* Minimal placeholder stylesheet to avoid 404 when index.html requests /index.css.
+   You can move Tailwind to a built CSS later if desired. */
+:root { --placeholder: 1; }

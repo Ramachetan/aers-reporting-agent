@@ -3,11 +3,21 @@ import { GoogleGenAI, GenerateContentResponse, Type, Part, Content } from "@goog
 import type { Message, ReportData, GeminiResponse } from '../types';
 import { SYSTEM_PROMPT, RESPONSE_SCHEMA, getAdverseEffectSuggestionsTool } from '../constants';
 
-if (!process.env.API_KEY) {
+// In browser builds, process.env is replaced by Vite. Provide a safe runtime fallback via window.__ENV__.
+declare global {
+  interface Window {
+    __ENV__?: Record<string, any>;
+  }
+}
+
+const API_KEY = (typeof process !== 'undefined' && (process as any).env && (process as any).env.API_KEY)
+  || (typeof window !== 'undefined' && window.__ENV__ && (window.__ENV__.API_KEY || window.__ENV__.GEMINI_API_KEY));
+
+if (!API_KEY) {
   throw new Error("API_KEY environment variable not set");
 }
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenAI({ apiKey: API_KEY });
 
 /**
  * Calls an external API to get medically accurate adverse effect terms.
