@@ -4,8 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "npm run build:css && vite",
+    "build": "npm run build:css && vite build",
+    "build:css": "npx tailwindcss -i ./src/styles.css -o ./public/index.css --watch=false",
+    "build:css:watch": "npx tailwindcss -i ./src/styles.css -o ./public/index.css --watch",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -21,7 +23,9 @@
     "vite": "^7.0.5"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.1.11",
     "@types/node": "^22.14.0",
+    "tailwindcss": "^4.1.11",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
   }
