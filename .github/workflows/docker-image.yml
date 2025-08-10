@@ -7,12 +7,24 @@ on:
     branches: [ "main" ]
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      run: |
+        docker build . --file Dockerfile --tag ramachetan/aers-reporting:${{ github.sha }}
+        docker tag ramachetan/aers-reporting:${{ github.sha }} ramachetan/aers-reporting:latest
+
+    - name: Push Docker image to Docker Hub
+      run: |
+        docker push ramachetan/aers-reporting:${{ github.sha }}
+        docker push ramachetan/aers-reporting:latest
