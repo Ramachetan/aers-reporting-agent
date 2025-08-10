@@ -78,3 +78,15 @@ This command will start the Vite server. Open your web browser and navigate to t
 5.  **Live Report Building**: As the conversation progresses, a "Live Data Report" on the side panel is updated in real-time with the information provided by the user.
 6.  **Manual Editing**: The user can click the pencil icon on any section of the report to manually edit the data at any point during the process.
 7.  **Review and Download**: Once the AI determines all necessary information has been collected, it presents a final review screen. The user can then download the completed report as a JSON file.
+
+## CI/CD Pipeline
+
+This repository includes a GitHub Actions workflow for continuous integration:
+
+- **Workflow File**: `.github/workflows/docker-image.yml`
+- **Purpose**: Automatically builds Docker images on push/PR to main branch
+- **Documentation**: See [GITHUB_WORKFLOW_EXPLANATION.md](./GITHUB_WORKFLOW_EXPLANATION.md) for detailed explanation
+- **Quick Reference**: See [WORKFLOW_SUMMARY.md](./WORKFLOW_SUMMARY.md) for a concise overview
+- **Visual Flow**: See [WORKFLOW_DIAGRAM.md](./WORKFLOW_DIAGRAM.md) for visual diagrams
+
+The workflow ensures that every code change can be successfully containerized, supporting reliable deployment of this medical reporting application.
