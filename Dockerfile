@@ -1,8 +1,9 @@
 # Use Node.js 20 LTS as base image
-FROM node:20-alpine AS builder
+FROM node:20.6-alpine AS builder
 
 # Set working directory
 WORKDIR /app
+
 
 # Copy package files
 COPY package*.json ./
