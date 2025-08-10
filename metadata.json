@@ -1,0 +1,8 @@
+{
+  "name": "AERS Reporting Agent",
+  "description": "A System Agnostic, Scalable, Compliant & Future-Ready AE Intake Solution Powered by AI",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "prompt": ""
+}
