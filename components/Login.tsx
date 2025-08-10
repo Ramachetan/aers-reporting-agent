@@ -7,9 +7,10 @@ import { useAuth } from '../contexts/AuthContext'
 interface LoginProps {
   onSuccess?: () => void;
   onBack?: () => void;
+  pendingAction?: string; // New prop to show what action is pending
 }
 
-const Login: React.FC<LoginProps> = ({ onSuccess, onBack }) => {
+const Login: React.FC<LoginProps> = ({ onSuccess, onBack, pendingAction }) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSignUp, setIsSignUp] = useState(false)
@@ -97,7 +98,7 @@ const Login: React.FC<LoginProps> = ({ onSuccess, onBack }) => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin
+          redirectTo: `${window.location.origin}${window.location.pathname}`
         }
       })
       if (error) {
@@ -136,8 +137,19 @@ const Login: React.FC<LoginProps> = ({ onSuccess, onBack }) => {
             </div>
             <h1 className="text-2xl font-bold text-primary mb-2">AERS Reporting Agent</h1>
             <p className="text-text-muted">
-              {isSignUp ? 'Create an account to start reporting' : 'Sign in to securely report medication side effects'}
+              {pendingAction ? (
+                <>
+                  Please sign in to continue with {pendingAction}
+                </>
+              ) : (
+                isSignUp ? 'Create an account to start reporting' : 'Sign in to securely report medication side effects'
+              )}
             </p>
+            {pendingAction && (
+              <div className="mt-2 p-2 bg-blue-50 border border-blue-200 text-blue-700 rounded text-sm">
+                Don't worry - we'll take you right back to reporting after you sign in!
+              </div>
+            )}
           </div>
 
           {/* Error/Success Messages */}

@@ -47,6 +47,10 @@ const App: React.FC = () => {
   const [isSuggestionModalOpen, setIsSuggestionModalOpen] = useState<boolean>(false);
   const [modalSuggestions, setModalSuggestions] = useState<string[]>([]);
   const [pendingReportData, setPendingReportData] = useState<{description: string, files?: File[]} | null>(null);
+  const [isProcessingPendingData, setIsProcessingPendingData] = useState<boolean>(() => {
+    // Check immediately on mount if there's pending data to avoid flash
+    return typeof window !== 'undefined' && !!localStorage.getItem('pendingReportData');
+  });
 
   // Update report data when user changes (login/logout)
   useEffect(() => {
@@ -63,6 +67,9 @@ const App: React.FC = () => {
     setReportData(createInitialReportDataWithUser(user));
     setIsLoading(false);
     setError(null);
+    setPendingReportData(null);
+    setIsProcessingPendingData(false);
+    localStorage.removeItem('pendingReportData'); // Clear any stored pending data
   }, [user]);
 
   // Handle logout - reset to home page when user becomes null
@@ -206,11 +213,16 @@ const App: React.FC = () => {
   const handleStartReport = useCallback(async (description: string, files?: File[]) => {
     // Check if user is authenticated before starting the report
     if (!user) {
+      console.log('User not authenticated, storing pending report data:', { description, files: files?.length || 0 });
+      const pendingData = { description, files: files?.map(f => ({ name: f.name, size: f.size, type: f.type })) };
       setPendingReportData({ description, files });
+      // Also store in localStorage to survive OAuth redirects
+      localStorage.setItem('pendingReportData', JSON.stringify(pendingData));
       setView('login');
       return;
     }
 
+    console.log('Starting report for authenticated user:', { description, files: files?.length || 0 });
     setIsLoading(true);
     setError(null);
     
@@ -237,8 +249,41 @@ const App: React.FC = () => {
       setError(`I'm sorry, I had trouble starting the report. ${errorMessage}`);
     } finally {
       setIsLoading(false);
+      setIsProcessingPendingData(false); // Clear processing state in case this was called from OAuth flow
     }
   }, [handleProcessAiResponse, user]);
+
+  // Check for pending report data after OAuth redirect
+  useEffect(() => {
+    if (user && !loading) {
+      const storedPendingData = localStorage.getItem('pendingReportData');
+      if (storedPendingData) {
+        try {
+          const parsedData = JSON.parse(storedPendingData);
+          console.log('Found stored pending report data after OAuth:', parsedData);
+          setIsProcessingPendingData(true);
+          localStorage.removeItem('pendingReportData');
+          
+          // Start the report with the stored description (files are lost during OAuth redirect)
+          if (parsedData.description) {
+            setTimeout(() => {
+              handleStartReport(parsedData.description);
+              setIsProcessingPendingData(false);
+            }, 100);
+          } else {
+            setIsProcessingPendingData(false);
+          }
+        } catch (e) {
+          console.error('Error parsing stored pending data:', e);
+          localStorage.removeItem('pendingReportData');
+          setIsProcessingPendingData(false);
+        }
+      } else if (isProcessingPendingData) {
+        // No stored data but we're in processing state, clear it
+        setIsProcessingPendingData(false);
+      }
+    }
+  }, [user, loading, handleStartReport, isProcessingPendingData]);
 
   const handleConfirmSuggestion = useCallback((suggestion: string) => {
     setIsSuggestionModalOpen(false);
@@ -252,19 +297,25 @@ const App: React.FC = () => {
   }, []);
 
   const handleLoginSuccess = useCallback(() => {
+    console.log('Login successful. Checking for pending report data:', pendingReportData);
     if (pendingReportData) {
       // User logged in after trying to start a report, so start it now
       const { description, files } = pendingReportData;
+      console.log('Found pending report data, starting report:', { description, files: files?.length || 0 });
       setPendingReportData(null);
+      // Also clear localStorage in case it was stored there
+      localStorage.removeItem('pendingReportData');
       handleStartReport(description, files);
     } else {
       // Regular login, go back to greeting
+      console.log('No pending report data, going to greeting');
       setView('greeting');
     }
   }, [pendingReportData, handleStartReport]);
 
   const handleBackToHome = useCallback(() => {
     setPendingReportData(null);
+    localStorage.removeItem('pendingReportData'); // Clear any stored pending data
     setView('greeting');
   }, []);
   
@@ -282,12 +333,22 @@ const App: React.FC = () => {
   }, [reportData]);
 
   // Early returns AFTER all hooks
-  if (loading) {
+  if (loading || isProcessingPendingData) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Logo />
-          <div className="text-lg text-text-muted">Loading...</div>
+          <div className="flex items-center gap-3">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+            <div className="text-lg text-text-muted">
+              {isProcessingPendingData ? 'Setting up your report...' : 'Loading...'}
+            </div>
+          </div>
+          {isProcessingPendingData && (
+            <div className="text-sm text-text-muted max-w-md text-center">
+              We're taking you right back to where you left off!
+            </div>
+          )}
         </div>
       </div>
     );
@@ -295,7 +356,8 @@ const App: React.FC = () => {
 
   // Show login page only when explicitly requested or when trying to access protected features
   if (view === 'login') {
-    return <Login onSuccess={handleLoginSuccess} onBack={handleBackToHome} />;
+    const pendingActionMessage = pendingReportData ? 'reporting your side effect' : undefined;
+    return <Login onSuccess={handleLoginSuccess} onBack={handleBackToHome} pendingAction={pendingActionMessage} />;
   }
 
   if (view === 'greeting') {
