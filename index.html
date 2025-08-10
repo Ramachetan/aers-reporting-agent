@@ -10,48 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-             sans: ['Poppins', 'sans-serif'],
-            },
-            colors: {
-              background: '#F7F9FC', // Very light blue-gray
-              surface: '#ffffff',
-              primary: {
-                DEFAULT: '#3B82F6', // blue-500
-                dark: '#2563EB',   // blue-600
-                light: '#BFDBFE',  // blue-200
-              },
-              secondary: {
-                 DEFAULT: '#14B8A6', // teal-500
-                 light: '#F0FDFA', // teal-50
-              },
-              text: {
-                DEFAULT: '#1E293B', // slate-800
-                muted: '#64748B',   // slate-500
-              },
-              border: {
-                DEFAULT: '#E2E8F0', // slate-200
-                medium: '#CBD5E1',  // slate-300
-              }
-            },
-            animation: {
-                'fade-in-up': 'fade-in-up 0.8s ease-in-out both',
-            },
-            keyframes: {
-                'fade-in-up': {
-                    '0%': { opacity: '0', transform: 'translateY(20px)' },
-                    '100%': { opacity: '1', transform: 'translateY(0)' },
-                },
-            }
-          },
-        },
-      }
-    </script>
+    <link rel="stylesheet" href="/index.css">
   <script type="importmap">
 {
   "imports": {
@@ -66,7 +25,6 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 <script>
   // window.__ENV__ is populated at runtime by /env.js served by Nginx.
   window.__ENV__ = window.__ENV__ || {};

@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for the AERS Reporting Agent */
+body {
+  font-family: 'Poppins', sans-serif;
+}
