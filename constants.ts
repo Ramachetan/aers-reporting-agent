@@ -38,11 +38,96 @@ export const createInitialReportDataWithUser = (user: User | null): ReportData =
       first_name: metadata.first_name || null,
       last_name: metadata.last_name || null,
       email: user.email || null,
+      phone: metadata.phone || null,
+      address: metadata.address || null,
+      city: metadata.city || null,
+      state: metadata.state || null,
+      zip_code: metadata.zip_code || null,
       country: metadata.country || null,
+      reported_to_manufacturer: metadata.reported_to_manufacturer_preference ?? null,
+      permission_to_share_identity: metadata.permission_to_share_identity_preference ?? null,
     };
   }
   
   return baseData;
+};
+
+// Utility function to calculate profile completion percentage
+export const calculateProfileCompletionPercentage = (user: User | null): number => {
+  if (!user) return 0;
+  
+  const metadata = user.user_metadata || {};
+  
+  // Base fields that apply to everyone
+  const baseFields = [
+    metadata.first_name,
+    metadata.last_name,
+    user.email,
+    metadata.phone,
+    metadata.country,
+    metadata.profession,
+    metadata.preferred_contact_method,
+    metadata.address,
+    metadata.city,
+    metadata.state,
+    metadata.zip_code
+  ];
+  
+  let totalFields = baseFields.length;
+  let completedFields = baseFields.filter(field => field && field.trim() !== '').length;
+  
+  // Add professional fields only for relevant professions
+  const profession = metadata.profession;
+  const professionalRoles = [
+    'physician', 'nurse', 'pharmacist', 'physician_assistant', 
+    'nurse_practitioner', 'dentist', 'veterinarian', 'healthcare_professional',
+    'researcher', 'lawyer', 'regulatory_affairs', 'pharmaceutical_industry'
+  ];
+  
+  if (profession && professionalRoles.includes(profession)) {
+    const professionalFields = [
+      metadata.institution,
+      metadata.specialization,
+      metadata.license_number
+    ];
+    totalFields += professionalFields.length;
+    completedFields += professionalFields.filter(field => field && field.trim() !== '').length;
+  }
+
+  return Math.round((completedFields / totalFields) * 100);
+};
+
+// Helper to get missing profile fields for suggestions
+export const getMissingProfileFields = (user: User | null): string[] => {
+  if (!user) return [];
+  
+  const metadata = user.user_metadata || {};
+  const missingFields: string[] = [];
+  
+  // Base fields that apply to everyone
+  if (!metadata.phone) missingFields.push('Phone number');
+  if (!metadata.country) missingFields.push('Country');
+  if (!metadata.preferred_contact_method) missingFields.push('Preferred contact method');
+  if (!metadata.address) missingFields.push('Address');
+  if (!metadata.city) missingFields.push('City');
+  if (!metadata.state) missingFields.push('State/Province');
+  if (!metadata.zip_code) missingFields.push('ZIP/Postal code');
+  
+  // Professional fields only for relevant professions
+  const profession = metadata.profession;
+  const professionalRoles = [
+    'physician', 'nurse', 'pharmacist', 'physician_assistant', 
+    'nurse_practitioner', 'dentist', 'veterinarian', 'healthcare_professional',
+    'researcher', 'lawyer', 'regulatory_affairs', 'pharmaceutical_industry'
+  ];
+  
+  if (profession && professionalRoles.includes(profession)) {
+    if (!metadata.institution) missingFields.push('Institution/Practice');
+    if (!metadata.specialization) missingFields.push('Specialization');
+    if (!metadata.license_number) missingFields.push('License number');
+  }
+  
+  return missingFields;
 };
 
 export const getAdverseEffectSuggestionsTool = {

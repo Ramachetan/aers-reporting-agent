@@ -51,6 +51,12 @@ const Login: React.FC<LoginProps> = ({ onSuccess, onBack, pendingAction }) => {
           return
         }
         
+        if (!profession) {
+          setError('Please select your profession')
+          setLoading(false)
+          return
+        }
+        
         if (!agreeToTerms) {
           setError('Please agree to the terms and conditions')
           setLoading(false)
@@ -261,25 +267,47 @@ const Login: React.FC<LoginProps> = ({ onSuccess, onBack, pendingAction }) => {
 
                 <div>
                   <label htmlFor="profession" className="block text-sm font-medium text-text mb-2">
-                    Profession (Optional)
+                    Profession *
                   </label>
                   <select
                     id="profession"
                     value={profession}
                     onChange={(e) => setProfession(e.target.value)}
                     className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white text-text"
+                    required
                   >
                     <option value="">Select your profession</option>
-                    <option value="healthcare_professional">Healthcare Professional</option>
-                    <option value="physician">Physician</option>
-                    <option value="nurse">Nurse</option>
-                    <option value="pharmacist">Pharmacist</option>
-                    <option value="patient">Patient</option>
-                    <option value="caregiver">Caregiver/Family Member</option>
-                    <option value="researcher">Researcher</option>
-                    <option value="lawyer">Lawyer</option>
-                    <option value="other">Other</option>
+                    <optgroup label="Healthcare Professionals">
+                      <option value="physician">Physician/Doctor</option>
+                      <option value="nurse">Nurse</option>
+                      <option value="pharmacist">Pharmacist</option>
+                      <option value="physician_assistant">Physician Assistant</option>
+                      <option value="nurse_practitioner">Nurse Practitioner</option>
+                      <option value="dentist">Dentist</option>
+                      <option value="veterinarian">Veterinarian</option>
+                      <option value="healthcare_professional">Other Healthcare Professional</option>
+                    </optgroup>
+                    <optgroup label="Research & Industry">
+                      <option value="researcher">Medical Researcher</option>
+                      <option value="pharmaceutical_industry">Pharmaceutical Industry</option>
+                      <option value="regulatory_affairs">Regulatory Affairs</option>
+                      <option value="clinical_research">Clinical Research</option>
+                    </optgroup>
+                    <optgroup label="Legal & Advocacy">
+                      <option value="lawyer">Lawyer</option>
+                      <option value="patient_advocate">Patient Advocate</option>
+                    </optgroup>
+                    <optgroup label="Patients & Caregivers">
+                      <option value="patient">Patient</option>
+                      <option value="caregiver">Caregiver/Family Member</option>
+                    </optgroup>
+                    <optgroup label="Other">
+                      <option value="other">Other</option>
+                    </optgroup>
                   </select>
+                  <p className="mt-1 text-xs text-text-muted">
+                    This helps us provide relevant features and ensures proper reporting context
+                  </p>
                 </div>
               </>
             )}

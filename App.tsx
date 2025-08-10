@@ -384,7 +384,7 @@ const App: React.FC = () => {
               <h1 className="text-2xl font-bold text-primary">AERS Reporting Agent</h1>
             </div>
             <div className="flex items-center gap-4">
-              <UserProfile />
+              <UserProfile showProfileCompletion={true} />
               <button 
                 onClick={handleReset}
                 className="p-2 rounded-full hover:bg-background text-text-muted hover:text-primary transition-colors"
